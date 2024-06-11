@@ -4,17 +4,29 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttri
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import tech.buildrun.dynamodb.controller.dto.ScoreDto;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @DynamoDbBean
-public class PlayHistoryEntity {
+public class PlayerHistoryEntity {
 
     private String username;
     private UUID gameId;
     private Double score;
     private Instant createdAt;
+
+    public static PlayerHistoryEntity fromScore(String username, ScoreDto scoreDto) {
+        var entity = new PlayerHistoryEntity();
+
+        entity.setUsername(username);
+        entity.setGameId(UUID.randomUUID());
+        entity.setScore(scoreDto.score());
+        entity.setCreatedAt(Instant.now());
+
+        return entity;
+    }
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("username") // nome que está definido no banco de dados

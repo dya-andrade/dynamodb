@@ -133,4 +133,46 @@ Documentação sobre o Spring Cloud AWS</a>
 
 ### Crie o CRUD
 
-* Siga o exemplo que está no projeto na pasta
+* Siga o exemplo que está no projeto na pasta controller e dto
+
+## Criar a tabela no site LocalStack
+
+* Vá em **LocalStack Instances** e depois **Status** e clique no DynamoDB
+* Clique em **Create Table** e cadastre os atributos em **Attribute Definitions** (exceto Score e CreatedAt)
+* Informe o nome da tabela em **Table Name**, que por padrão será **player_history_entity**
+* Em **Key Schema**, informa qual é **PartitionKey** e **SortKey**. O primeiro como **HASH** e o segundo como **RANGE**.
+* Depois defina o formato de cobrança **Billing Mode**, para **PAY_PER_REQUEST**
+
+## Testando a inserção de dados no DynamoDB
+
+* Rode a aplicação e execute o seguinte comando no terminal
+
+* Instale o HttPie
+
+```shell
+sudo apt update
+sudo apt install httpie
+http --version
+```
+
+* E execute a requisição
+
+```shell
+http post localhost:8080/v1/players/dyane/games score=100
+```
+
+* Ao olhar no site na instância do DynamoDB, verá na tabela os dados enviados na requisição
+
+## Outra forma de criar a tabela no LocalStack por script
+
+* Dê permissão para execução do arquivo
+
+```shell
+chmod +x setup_run.sh
+```
+
+* Execute o script
+
+```shell
+./setup_run.sh
+```
