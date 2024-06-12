@@ -3,8 +3,13 @@ package tech.buildrun.dynamodb.controller;
 import io.awspring.cloud.dynamodb.DynamoDbTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import tech.buildrun.dynamodb.controller.dto.ScoreDto;
 import tech.buildrun.dynamodb.entity.PlayerHistoryEntity;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("v1/players")
@@ -24,6 +29,68 @@ public class PlayerController {
 
         dynamoDbTemplate.save(entity);
 
-        return  ResponseEntity.ok().build();
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{username}/games")
+    public ResponseEntity<List<PlayerHistoryEntity>> findAll(@PathVariable("username") String username) {
+        var key = Key.builder().partitionValue(username).build();
+
+        var condition = QueryConditional.keyEqualTo(key);
+
+        var query = QueryEnhancedRequest.builder()
+                .queryConditional(condition)
+                .build();
+
+        var pageIterable = dynamoDbTemplate.query(query, PlayerHistoryEntity.class);
+
+        var entities = pageIterable.items().stream().toList();
+
+        return ResponseEntity.ok(entities);
+    }
+
+    @GetMapping("/{username}/games/{gameId}")
+    public ResponseEntity<PlayerHistoryEntity> findById(@PathVariable("username") String username,
+                                                        @PathVariable("gameId") String gameId) {
+        var key = Key.builder().partitionValue(username).sortValue(gameId).build();
+
+        var entity = dynamoDbTemplate.load(key, PlayerHistoryEntity.class);
+
+        return entity == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(entity);
+    }
+
+    @PutMapping("/{username}/games/{gameId}")
+    public ResponseEntity<Void> updateById(@PathVariable("username") String username,
+                                           @PathVariable("gameId") String gameId,
+                                           @RequestBody ScoreDto scoreDto) {
+        var key = Key.builder().partitionValue(username).sortValue(gameId).build();
+
+        var entity = dynamoDbTemplate.load(key, PlayerHistoryEntity.class);
+
+        if (entity == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        entity.setScore(scoreDto.score());
+
+        dynamoDbTemplate.save(entity);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{username}/games/{gameId}")
+    public ResponseEntity<Void> deleteById(@PathVariable("username") String username,
+                                           @PathVariable("gameId") String gameId) {
+        var key = Key.builder().partitionValue(username).sortValue(gameId).build();
+
+        var entity = dynamoDbTemplate.load(key, PlayerHistoryEntity.class);
+
+        if (entity == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        dynamoDbTemplate.delete(entity);
+
+        return ResponseEntity.noContent().build();
     }
 }

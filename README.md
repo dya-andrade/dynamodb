@@ -176,3 +176,21 @@ chmod +x setup_run.sh
 ```shell
 ./setup_run.sh
 ```
+
+## Outras requisições Http
+
+```shell
+http get localhost:8080/v1/players/dyane/games
+```
+
+```shell
+http get localhost:8080/v1/players/dyane/games/c5112122-37ca-4861-81f0-eb2767d3afdc
+```
+
+```shell
+http put localhost:8080/v1/players/dyane/games/c5112122-37ca-4861-81f0-eb2767d3afdc score=50
+```
+
+```shell
+http delete localhost:8080/v1/players/dyane/games/c5112122-37ca-4861-81f0-eb2767d3afdc
+```
